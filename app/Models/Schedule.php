@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Schedule extends Model
 {
+    protected $table = 'calista_schedules';
+
     protected $fillable = ['doctor_id', 'hari', 'jam_mulai', 'jam_selesai'];
 
     public function doctor()

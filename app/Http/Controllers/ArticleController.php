@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers; // Ubah namespace ini
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -58,5 +58,11 @@ class ArticleController extends Controller
         $article = Article::findOrFail($id);
         $article->delete();
         return redirect()->route('article.index')->with('success', 'Artikel berhasil dihapus.');
+    }
+
+    public function show($id)
+    {
+        $article = Article::with('doctor')->findOrFail($id);
+        return view('admin.article.show', compact('article'));
     }
 }

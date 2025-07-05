@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Pasien;
+namespace App\Http\Controllers; // Ubah namespace ini
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -39,13 +39,13 @@ class BookingController extends Controller
             'status' => 'pending'
         ]);
 
-        return redirect()->route('booking.index')->with('success', 'Booking berhasil dikirim.');
+        return redirect()->route('pasien.booking.index')->with('success', 'Booking berhasil dikirim.');
     }
 
     public function destroy($id)
     {
         $booking = Booking::where('user_id', Auth::id())->findOrFail($id);
         $booking->delete();
-        return redirect()->route('booking.index')->with('success', 'Booking berhasil dibatalkan.');
+        return redirect()->route('pasien.booking.index')->with('success', 'Booking berhasil dibatalkan.');
     }
 }
