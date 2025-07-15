@@ -20,6 +20,6 @@ class PasienMiddleware
             return $next($request);
         }
 
-        abort(403, 'Akses ditolak');
+        return redirect('/')->with('error', 'Akses hanya untuk pasien.');
     }
 }

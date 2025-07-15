@@ -16,6 +16,7 @@ class Doctor extends Model
         'spesialis',
         'kontak',
         'deskripsi',
+        'foto',
     ];
 
     public function schedules()

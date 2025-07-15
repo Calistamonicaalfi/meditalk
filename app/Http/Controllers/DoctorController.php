@@ -10,7 +10,7 @@ class DoctorController extends Controller
 {
     public function index()
     {
-        $dokter = Doctor::all();
+        $dokter = Doctor::with('schedules')->get();
         return view('admin.dokter.index', compact('dokter'));
     }
 
@@ -25,10 +25,15 @@ class DoctorController extends Controller
             'nama' => 'required',
             'spesialis' => 'required',
             'kontak' => 'required',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        Doctor::create($request->all());
-        return redirect()->route('dokter.index')->with('success', 'Data dokter berhasil ditambahkan.');
+        $data = $request->all();
+        if ($request->hasFile('foto')) {
+            $data['foto'] = $request->file('foto')->store('dokter', 'public');
+        }
+        Doctor::create($data);
+        return redirect()->route('admin.dokter.index')->with('success', 'Data dokter berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -43,17 +48,28 @@ class DoctorController extends Controller
             'nama' => 'required',
             'spesialis' => 'required',
             'kontak' => 'required',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $dokter = Doctor::findOrFail($id);
-        $dokter->update($request->all());
-        return redirect()->route('dokter.index')->with('success', 'Data dokter berhasil diperbarui.');
+        $data = $request->all();
+        if ($request->hasFile('foto')) {
+            $data['foto'] = $request->file('foto')->store('dokter', 'public');
+        }
+        $dokter->update($data);
+        return redirect()->route('admin.dokter.index')->with('success', 'Data dokter berhasil diperbarui.');
+    }
+
+    public function show($id)
+    {
+        $dokter = Doctor::with('schedules')->findOrFail($id);
+        return view('admin.dokter.show', compact('dokter'));
     }
 
     public function destroy($id)
     {
         $dokter = Doctor::findOrFail($id);
         $dokter->delete();
-        return redirect()->route('dokter.index')->with('success', 'Data dokter berhasil dihapus.');
+        return redirect()->route('admin.dokter.index')->with('success', 'Data dokter berhasil dihapus.');
     }
 }

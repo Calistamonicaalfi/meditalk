@@ -12,14 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('calista_doctors', function (Blueprint $table) {
-    $table->id();
-    $table->string('nama');
-    $table->string('spesialis');
-    $table->string('kontak');
-    $table->text('deskripsi')->nullable();
-    $table->timestamps();
-});
-
+            $table->id();
+            $table->string('nama');
+            $table->string('spesialis');
+            $table->string('kontak');
+            $table->text('deskripsi')->nullable();
+            $table->timestamps();
+        });
     }
 
     /**

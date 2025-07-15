@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -14,52 +15,53 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
-
-    public function register(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'pasien', // Default role untuk user baru
-        ]);
-
-        Auth::login($user);
-        return redirect()->route('pasien.dashboard')->with('success', 'Registrasi berhasil!');
-    }
-
-    public function login(Request $request)
+    public function login(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
+            'email'    => 'required|email',
+            'password' => 'required|string',
         ]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            $user = Auth::user();
-
-            if ($user->role === 'admin') {
-                return redirect()->route('admin.dashboard');
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('admin.dashboard')->with('success', 'Selamat datang, Admin!');
+            } elseif (Auth::user()->role === 'pasien') {
+                return redirect()->route('home')->with('success', 'Login berhasil. Selamat datang, ' . Auth::user()->name);
+            } else {
+                Auth::logout();
+                return redirect()->route('login')->withErrors(['email' => 'Role tidak dikenali.']);
             }
-
-            return redirect()->route('pasien.dashboard');
         }
 
         return back()->withErrors([
             'email' => 'Email atau password salah.',
-        ])->withInput();
+        ])->onlyInput('email');
+    }
+
+    public function showRegister()
+    {
+        return view('auth.register');
+    }
+
+    public function register(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::create([
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'role'     => 'pasien', // default role pasien
+        ]);
+
+        // Setelah register, redirect ke halaman login, tidak auto-login
+        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan login untuk melanjutkan.');
     }
 
     public function logout(Request $request)
@@ -67,7 +69,6 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
-        return redirect('/')->with('success', 'Logout berhasil!');
+        return redirect()->route('home')->with('success', 'Anda telah berhasil logout.');
     }
 }
